@@ -29,6 +29,7 @@ dependencies:
   window_size: ^0.1.0
   shared_preferences: ^2.5.3
   flutter_dotenv: ^5.2.1
+  window_manager: ^0.4.2
 
 dev_dependencies:
   flutter_test:

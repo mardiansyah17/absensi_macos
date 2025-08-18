@@ -13,7 +13,7 @@ class Layout extends StatefulWidget {
 }
 
 class _LayoutState extends State<Layout> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
 
   final List<SidebarItem> _itemsMain = const [
     SidebarItem(icon: CupertinoIcons.square_grid_2x2, label: 'Dashboard'),

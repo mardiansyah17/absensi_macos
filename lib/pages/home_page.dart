@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
             final widgetSize = renderBox?.size ?? Size.zero;
 
             // Gunakan ukuran asli gambar dari stream
-            final imageSize = Size(
+            const imageSize = Size(
               1280,
               720,
             );

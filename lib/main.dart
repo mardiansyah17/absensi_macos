@@ -1,8 +1,18 @@
-import 'package:face_client/widgets/layout.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-void main() {
+import 'package:face_client/widgets/layout.dart';
+import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
+import 'package:window_size/window_size.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
+
+  if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+    await WindowManager.instance.setFullScreen(true);
+  }
+
   runApp(const MyApp());
 }
 

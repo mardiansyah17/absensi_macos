@@ -25,11 +25,9 @@ import 'package:face_client/services/fast_jpeg_encoder.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:image/image.dart' as img;
 import 'package:window_size/window_size.dart';
 
@@ -37,8 +35,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
     setWindowMaxSize(Size.infinite);
-    setWindowMinSize(Size(800, 600)); // opsional
-    setWindowFrame(Rect.fromLTWH(0, 0, 1440, 900)); // ukuran awal
+    setWindowMinSize(const Size(800, 600)); // opsional
+    setWindowFrame(const Rect.fromLTWH(0, 0, 1440, 900)); // ukuran awal
   }
   runApp(const AttendanceApp());
 }
@@ -143,8 +141,8 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
   bool _isCameraOn = false;
   CameraStatus _cameraStatus = CameraStatus.stopped;
   ServerStatus _serverStatus = ServerStatus.connecting;
-  String _currentTime = '';
-  String _currentDate = '';
+  final String _currentTime = '';
+  final String _currentDate = '';
   String _uptime = '00:00:00';
   double _latency = 0.0;
   int _uptimeSeconds = 0;
@@ -1038,7 +1036,7 @@ class RecognitionPainter extends CustomPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.bold,

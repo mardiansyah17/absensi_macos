@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Sidebar extends StatelessWidget {
@@ -137,7 +136,7 @@ class _SidebarItemTileState extends State<_SidebarItemTile> {
           )
         : BoxDecoration(
             color: _hover
-                ? scheme.surfaceVariant.withOpacity(0.22)
+                ? scheme.surfaceContainerHighest.withOpacity(0.22)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           );

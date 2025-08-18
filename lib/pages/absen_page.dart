@@ -76,12 +76,12 @@ class BoundingBox {
     }
 
     // Server LAMA: {top,left,right,bottom} (pixel)
-    double _n(dynamic v) => (v is num) ? v.toDouble() : 0.0;
+    double n(dynamic v) => (v is num) ? v.toDouble() : 0.0;
     return BoundingBox(
-      left: _n(json['left']),
-      top: _n(json['top']),
-      right: _n(json['right']),
-      bottom: _n(json['bottom']),
+      left: n(json['left']),
+      top: n(json['top']),
+      right: n(json['right']),
+      bottom: n(json['bottom']),
     );
   }
 }
@@ -125,8 +125,8 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
   bool _isCameraOn = false;
   CameraStatus _cameraStatus = CameraStatus.stopped;
   ServerStatus _serverStatus = ServerStatus.connecting;
-  String _currentTime = '';
-  String _currentDate = '';
+  final String _currentTime = '';
+  final String _currentDate = '';
   String _uptime = '00:00:00';
   double _latency = 0.0;
   int _uptimeSeconds = 0;
@@ -134,7 +134,7 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
 
   bool _sending = false;
   int _lastSendMs = 0;
-  int _minGapMs = 1000; // ~12.5 fps
+  final int _minGapMs = 1000; // ~12.5 fps
 
   WelcomeInfo _welcomeInfo = WelcomeInfo(
     status: WelcomeStatus.defaultStatus,
@@ -468,10 +468,12 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
 
                                 final nowMs =
                                     DateTime.now().millisecondsSinceEpoch;
-                                if ((nowMs - _lastSendMs) < _minGapMs)
+                                if ((nowMs - _lastSendMs) < _minGapMs) {
                                   return; // throttle
-                                if (!(_socket?.connected ?? false))
+                                }
+                                if (!(_socket?.connected ?? false)) {
                                   return; // jangan antri saat socket belum konek
+                                }
 
                                 _sending = true;
                                 _lastSendMs = nowMs;
@@ -504,7 +506,6 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
                                     // image = null;
                                   });
                                 }
-                              } catch (e) {
                               } finally {
                                 _sending = false;
                               }
@@ -1035,7 +1036,7 @@ class RecognitionPainter extends CustomPainter {
         textDirection: ui.TextDirection.ltr,
         text: TextSpan(
           text: label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.bold,

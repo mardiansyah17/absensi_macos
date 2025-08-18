@@ -7,7 +7,7 @@ class DioClient {
 
   DioClient()
       : _dio = Dio(BaseOptions(
-          baseUrl: dotenv.env['BASE_URL']!,
+          baseUrl: "http://localhost:8001/api",
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
         )) {
@@ -16,10 +16,6 @@ class DioClient {
     );
 
     _dio.interceptors.add(LogInterceptor(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
-      responseHeader: false,
       error: true,
     ));
   }
