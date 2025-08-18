@@ -1,5 +1,6 @@
 import 'package:face_client/core/network/dio_client.dart';
 import 'package:face_client/core/utils/logger.dart';
+import 'package:face_client/models/attendance.dart';
 import 'package:face_client/models/employe.dart';
 
 class RemoteDatasource {
@@ -65,6 +66,22 @@ class RemoteDatasource {
     } catch (e) {
       logger.e(e);
       throw Exception('Failed to update employe: $e');
+    }
+  }
+
+  Future<List<Attendance>> getAttendances() async {
+    try {
+      final response = await dioClient.get('/attendances-report');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] as List<dynamic>;
+
+        return data.map((e) => Attendance.fromJson(e)).toList();
+      } else {
+        throw Exception('Failed to load attendances');
+      }
+    } catch (e) {
+      logger.e(e);
+      throw Exception('Failed to load attendances: $e');
     }
   }
 }

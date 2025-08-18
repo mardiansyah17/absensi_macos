@@ -4,6 +4,7 @@ import 'package:face_client/pages/karyawan_page.dart';
 import 'package:face_client/widgets/sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lazy_indexed_stack/flutter_lazy_indexed_stack.dart';
 
 class Layout extends StatefulWidget {
   const Layout({super.key});
@@ -68,7 +69,7 @@ class _LayoutState extends State<Layout> {
 
           // Main area — gunakan IndexedStack agar state halaman tetap terjaga
           Expanded(
-            child: IndexedStack(
+            child: LazyIndexedStack(
               index: _selectedIndex,
               children: _pages,
             ),

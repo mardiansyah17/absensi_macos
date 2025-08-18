@@ -1,10 +1,42 @@
+import 'package:face_client/core/utils/logger.dart';
+import 'package:face_client/datasource/remote_datasource.dart';
+import 'package:face_client/models/attendance.dart';
 import 'package:face_client/models/employe.dart';
 import 'package:face_client/widgets/page_shell.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class KehadiranPage extends StatelessWidget {
+class KehadiranPage extends StatefulWidget {
   const KehadiranPage({super.key});
+
+  @override
+  State<KehadiranPage> createState() => _KehadiranPageState();
+}
+
+class _KehadiranPageState extends State<KehadiranPage> {
+  final RemoteDatasource datasource = RemoteDatasource();
+  final List<Attendance> attendances = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAttendances();
+  }
+
+  Future<void> _loadAttendances() async {
+    try {
+      final data = await datasource.getAttendances();
+      setState(() {
+        attendances.clear();
+        attendances.addAll(data);
+      });
+    } catch (e) {
+      // Handle error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memuat data kehadiran: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,43 +63,19 @@ class KehadiranPage extends StatelessWidget {
             DataColumn(label: _Header('JAM KELUAR')),
             DataColumn(label: _Header('STATUS')),
           ],
-          rows: [],
+          rows: attendances.map((e) => _row(e)).toList(),
         ),
       ),
     );
   }
 
-  DataRow _row(Employe e) {
-    final hasFace = e.faceImageUrl != null && e.faceImageUrl!.isNotEmpty;
+  DataRow _row(Attendance e) {
     return DataRow(cells: [
-      DataCell(Text(e.nip)),
-      DataCell(Text(e.name)),
-      DataCell(Text(e.email)),
-      DataCell(Text(e.department?.name ?? '-')),
-      DataCell(Row(
-        children: [
-          Icon(hasFace ? Icons.verified : Icons.error_outline,
-              size: 18, color: hasFace ? Colors.green : Colors.orange),
-          const SizedBox(width: 6),
-          Text(hasFace ? 'Terdaftar' : 'Belum Terdaftar',
-              style: TextStyle(color: hasFace ? Colors.green : Colors.orange)),
-        ],
-      )),
-      DataCell(Row(
-        children: [
-          IconButton(
-            tooltip: 'Edit',
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            tooltip: 'Hapus',
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () {},
-          ),
-        ],
-      )),
+      DataCell(Text(e.employe.name)),
+      DataCell(Text(e.employe.department?.name ?? 'Tidak diketahui')),
+      DataCell(Text(e.clockIn?.toLocal().toString() ?? 'Belum masuk')),
+      DataCell(Text(e.clockOut?.toLocal().toString() ?? 'Belum keluar')),
+      DataCell(Text(e.status)),
     ]);
   }
 }

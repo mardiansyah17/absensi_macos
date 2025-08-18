@@ -1,4 +1,14 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:camera/camera.dart';
+import 'package:camera_macos/camera_macos_arguments.dart';
+import 'package:camera_macos/camera_macos_controller.dart';
+import 'package:camera_macos/camera_macos_device.dart';
+import 'package:camera_macos/camera_macos_file.dart';
+import 'package:camera_macos/camera_macos_platform_interface.dart';
+import 'package:camera_macos/camera_macos_view.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import 'package:face_client/core/utils/logger.dart';
@@ -166,39 +176,12 @@ class _KaryawanPageState extends State<KaryawanPage> {
   }
 
   Future<void> _deleteEmploye(Employe emp) async {
-    final ok = await showDialog<bool>(
+    showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Hapus Karyawan?'),
-        content: Text('Anda yakin ingin menghapus ${emp.name}?'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Batal')),
-          FilledButton.tonal(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Hapus')),
-        ],
+      builder: (_) => RegisterFaceDialogMacOS(
+        employeeId: emp.id, // ID karyawan
       ),
     );
-
-    if (ok != true) return;
-
-    try {
-      // await _remote.deleteEmploye(emp.id);
-      _items.removeWhere((e) => e.id == emp.id);
-      if (mounted) setState(() {});
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Karyawan dihapus')),
-      );
-    } catch (e, st) {
-      logger.e('Hapus gagal', error: e, stackTrace: st);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menghapus: $e')),
-      );
-    }
   }
 
   Future<void> _openEditDialog({Employe? initial}) async {
@@ -605,3 +588,179 @@ class _KaryawanFormDialogState extends State<_KaryawanFormDialog> {
     setState(() => _saving = false);
   }
 }
+
+class RegisterFaceDialogMacOS extends StatefulWidget {
+  final String employeeId;
+  final Uint8List? existingFaceBytes;
+
+  const RegisterFaceDialogMacOS({
+    super.key,
+    required this.employeeId,
+    this.existingFaceBytes,
+  });
+
+  @override
+  State<RegisterFaceDialogMacOS> createState() =>
+      _RegisterFaceDialogMacOSState();
+}
+
+class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
+  CameraMacOSController? _controller;
+  bool _showCamera = false;
+  bool _isSaving = false;
+  Uint8List? _capturedBytes;
+
+  Future<void> _toggleCamera(bool value) async {
+    setState(() => _showCamera = value);
+    if (!value) {
+      await _controller?.destroy();
+      _controller = null;
+    } else {
+      setState(() => _capturedBytes = null);
+    }
+  }
+
+  Future<void> _capture() async {
+    if (_controller == null) return;
+    try {
+      final CameraMacOSFile? file = await _controller!.takePicture();
+      if (file?.bytes != null) {
+        setState(() => _capturedBytes = file!.bytes);
+        await _toggleCamera(false);
+      }
+    } catch (e) {
+      debugPrint('Gagal ambil foto: $e');
+    }
+  }
+
+  Future<void> _submit() async {
+    if (_capturedBytes == null) return;
+    setState(() => _isSaving = true);
+    try {
+      final dio = Dio();
+      final formData = FormData.fromMap({
+        "employeeId": widget.employeeId,
+        "image": MultipartFile.fromBytes(
+          _capturedBytes!,
+          filename: "face-${widget.employeeId}.jpg",
+        ),
+      });
+
+      final response = await dio.post(
+        "http://localhost:8001/api/register-face",
+        data: formData,
+        options: Options(headers: {
+          "Content-Type": "multipart/form-data",
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Wajah berhasil disimpan.")),
+          );
+          Navigator.of(context).pop();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    "Gagal menyimpan wajah. Status: ${response.statusCode}")),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.destroy();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Registrasi Wajah",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Container(
+              width: 320,
+              height: 240,
+              color: Colors.black,
+              child: _buildPreview(),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _toggleCamera(!_showCamera),
+                  child: Text(_showCamera ? "Matikan Kamera" : "Mulai Kamera"),
+                ),
+                ElevatedButton(
+                  onPressed:
+                      _showCamera && _controller != null ? _capture : null,
+                  child: const Text("Ambil Foto"),
+                ),
+                ElevatedButton(
+                  onPressed:
+                      _capturedBytes != null && !_isSaving ? _submit : null,
+                  child: _isSaving
+                      ? const CircularProgressIndicator()
+                      : const Text("Simpan"),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreview() {
+    if (_capturedBytes != null) {
+      return Image.memory(_capturedBytes!, fit: BoxFit.cover);
+    }
+    if (_showCamera) {
+      return CameraMacOSView(
+        fit: BoxFit.cover,
+        cameraMode: CameraMacOSMode.photo,
+        onCameraInizialized: (controller) {
+          setState(() => _controller = controller);
+        },
+      );
+    }
+    if (widget.existingFaceBytes != null) {
+      return Image.memory(widget.existingFaceBytes!, fit: BoxFit.cover);
+    }
+    return const Center(
+      child: Icon(Icons.person_outline, color: Colors.white54, size: 64),
+    );
+  }
+}
+// Cara pakai:
+// showDialog(
+//   context: context,
+//   builder: (_) => RegisterFaceDialog(
+//     faceImageUrl: karyawan.faceImageUrl,
+//     onRegister: () {
+//       // Jalankan logika daftar wajah di sini
+//     },
+//   ),
+// );
