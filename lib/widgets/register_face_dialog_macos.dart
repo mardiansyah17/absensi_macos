@@ -6,12 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image/image.dart' as img;
 
-/// ------------------------------------------------------------
-/// RegisterFaceDialogMacOS (Modern UI)
-/// ------------------------------------------------------------
-/// • Tampilan modern, clean, dan cocok desktop macOS
-/// • Live preview kamera, ambil foto, ulangi, dan simpan (upload)
-/// • Otomatis normalisasi ke JPEG sebelum upload (menghindari error HEIC/PNG)
 class RegisterFaceDialogMacOS extends StatefulWidget {
   final String employeeId;
   final String? existingFaceUrl;
@@ -67,7 +61,6 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
     if (_capturedBytes == null) return;
     setState(() => _isSaving = true);
     try {
-      // Normalisasi -> JPEG (hindari Unsupported image type di backend)
       final decoded = img.decodeImage(_capturedBytes!);
       if (decoded == null) throw Exception('Gagal decode gambar');
       final jpgBytes = img.encodeJpg(decoded, quality: 92);
@@ -111,18 +104,16 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
     final theme = Theme.of(context);
 
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       backgroundColor: Colors.transparent,
       child: _Glass(
-        borderRadius: 22,
-        padding: const EdgeInsets.all(18),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 860),
-          child: Column(
+          borderRadius: 22,
+          padding: const EdgeInsets.all(18),
+          child: Center(
+              child: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Row(
                 children: [
                   Container(
@@ -159,12 +150,9 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
                   )
                 ],
               ),
-
               const SizedBox(height: 14),
               const _DividerLine(),
               const SizedBox(height: 14),
-
-              // Body
               LayoutBuilder(
                 builder: (context, c) {
                   final isWide = c.maxWidth > 720;
@@ -172,7 +160,6 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
                     direction: isWide ? Axis.horizontal : Axis.vertical,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Controls
                       Flexible(
                         flex: 11,
                         child: Column(
@@ -202,6 +189,8 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
                             const SizedBox(height: 14),
                             Wrap(spacing: 12, runSpacing: 12, children: [
                               FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF2563EB)),
                                 onPressed: () => _toggleCamera(!_showCamera),
                                 icon: Icon(
                                     _showCamera ? Icons.stop : Icons.videocam),
@@ -240,10 +229,7 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
                           ],
                         ),
                       ),
-
                       SizedBox(width: isWide ? 18 : 0, height: isWide ? 0 : 18),
-
-                      // Preview Pane
                       Flexible(
                         flex: 13,
                         child: AspectRatio(
@@ -257,7 +243,6 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
                                   duration: const Duration(milliseconds: 240),
                                   child: _buildPreview(),
                                 ),
-                                // Overlay panduan lingkaran/oval wajah
                                 IgnorePointer(
                                   child: CustomPaint(
                                     painter: _FaceGuidePainter(),
@@ -272,12 +257,9 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
                   );
                 },
               ),
-
               const SizedBox(height: 16),
               const _DividerLine(),
               const SizedBox(height: 12),
-
-              // Footer actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -299,9 +281,7 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
                 ],
               )
             ],
-          ),
-        ),
-      ),
+          ))),
     );
   }
 
@@ -329,7 +309,6 @@ class _RegisterFaceDialogMacOSState extends State<RegisterFaceDialogMacOS> {
   }
 }
 
-// ====================== WIDGETS & PAINTERS =======================
 class _Glass extends StatelessWidget {
   final Widget child;
   final double borderRadius;
@@ -472,31 +451,14 @@ class _FaceGuidePainter extends CustomPainter {
     final path = Path()
       ..addOval(Rect.fromCenter(center: center, width: rX * 2, height: rY * 2));
 
-    // Darken outside the oval slightly
     final overlay = Paint()..color = Colors.black.withOpacity(0.28);
     final outer = Path()..addRect(rect);
     final clip = Path.combine(PathOperation.difference, outer, path);
     canvas.drawPath(clip, overlay);
 
-    // Draw the oval guide
     canvas.drawPath(path, paint);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
-/// -------- Cara panggil dari halaman karyawan --------
-/// ElevatedButton(
-///   onPressed: () {
-///     showDialog(
-///       context: context,
-///       builder: (_) => RegisterFaceDialogMacOS(
-///         employeeId: karyawan.id,
-///         existingFaceBytes: karyawan.faceBytes, // opsional
-///         apiBaseUrl: 'http://localhost:8001',
-///       ),
-///     );
-///   },
-///   child: const Text('Daftarkan Wajah'),
-/// );

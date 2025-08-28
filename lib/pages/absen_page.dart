@@ -12,16 +12,12 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-// Enums untuk status
 enum CameraStatus { stopped, loading, success, error }
 
 enum ServerStatus { connecting, success, error }
 
 enum WelcomeStatus { defaultStatus, success, error }
 
-// Model untuk hasil pengenalan
-
-// ===== MODEL =====
 class RecognitionResult {
   final String name;
   final BoundingBox box;
@@ -43,7 +39,6 @@ class RecognitionResult {
 }
 
 class BoundingBox {
-  // Disimpan dalam format "pixel berbasis 640x480" supaya kompatibel
   final double left;
   final double top;
   final double right;
@@ -57,7 +52,6 @@ class BoundingBox {
   });
 
   factory BoundingBox.fromJson(Map<String, dynamic> json) {
-    // Server BARU: normalized 0..1 -> {x,y,w,h}
     if (json.containsKey('x')) {
       const double baseW = 640;
       const double baseH = 480;
@@ -75,7 +69,6 @@ class BoundingBox {
       );
     }
 
-    // Server LAMA: {top,left,right,bottom} (pixel)
     double n(dynamic v) => (v is num) ? v.toDouble() : 0.0;
     return BoundingBox(
       left: n(json['left']),
@@ -86,7 +79,6 @@ class BoundingBox {
   }
 }
 
-// Model untuk informasi welcome
 class WelcomeInfo {
   final WelcomeStatus status;
   final String title;
@@ -109,7 +101,6 @@ class AttendanceHomePage extends StatefulWidget {
 }
 
 class _AttendanceHomePageState extends State<AttendanceHomePage> {
-  // Controllers dan variabel
   final GlobalKey cameraKey = GlobalKey(debugLabel: 'cameraKey');
 
   CameraMacOSController? _cameraController;
@@ -121,7 +112,6 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
   Timer? _uptimeTimer;
   Timer? _welcomeTimer;
 
-  // State variables
   bool _isCameraOn = false;
   CameraStatus _cameraStatus = CameraStatus.stopped;
   ServerStatus _serverStatus = ServerStatus.connecting;
@@ -134,7 +124,7 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
 
   bool _sending = false;
   int _lastSendMs = 0;
-  final int _minGapMs = 1000; // ~12.5 fps
+  final int _minGapMs = 1000;
 
   WelcomeInfo _welcomeInfo = WelcomeInfo(
     status: WelcomeStatus.defaultStatus,
@@ -166,7 +156,6 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
   }
 
   Future<void> _initializeApp() async {
-    // await _requestPermissions();
     _initializeSocket();
     _startClock();
   }
@@ -329,25 +318,6 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
     });
   }
 
-  // Future<void> _sendFrameToServer() async {
-  //   if (_cameraController == null ||
-  //       !_cameraController!.value.isInitialized ||
-  //       _socket == null ||
-  //       !_socket!.connected) {
-  //     return;
-  //   }
-
-  //   try {
-  //     final image = await _cameraController!.takePicture();
-  //     final bytes = await image.readAsBytes();
-
-  //     _lastSentTime = DateTime.now();
-  //     _socket!.emit('recognize', bytes);
-  //   } catch (e) {
-  //     print('Error sending frame: $e');
-  //   }
-  // }
-
   Color _getWelcomePanelColor() {
     switch (_welcomeInfo.status) {
       case WelcomeStatus.success:
@@ -425,10 +395,10 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
     final length = argb.length;
     final rgba = Uint8List(length);
     for (int i = 0; i < length; i += 4) {
-      rgba[i] = argb[i + 1]; // R
-      rgba[i + 1] = argb[i + 2]; // G
-      rgba[i + 2] = argb[i + 3]; // B
-      rgba[i + 3] = argb[i]; // A
+      rgba[i] = argb[i + 1];
+      rgba[i + 1] = argb[i + 2];
+      rgba[i + 2] = argb[i + 3];
+      rgba[i + 3] = argb[i];
     }
     return rgba;
   }
@@ -438,7 +408,6 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
-          // Camera View
           Container(
             constraints: const BoxConstraints(maxWidth: 640, maxHeight: 480),
             child: AspectRatio(
@@ -469,10 +438,10 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
                                 final nowMs =
                                     DateTime.now().millisecondsSinceEpoch;
                                 if ((nowMs - _lastSendMs) < _minGapMs) {
-                                  return; // throttle
+                                  return;
                                 }
                                 if (!(_socket?.connected ?? false)) {
-                                  return; // jangan antri saat socket belum konek
+                                  return;
                                 }
 
                                 _sending = true;
@@ -502,9 +471,7 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
                                       "${now.hour}:${now.minute}:${now.second}";
                                   _socket?.emit('recognize', jpeg);
                                 } else {
-                                  setState(() {
-                                    // image = null;
-                                  });
+                                  setState(() {});
                                 }
                               } finally {
                                 _sending = false;
@@ -526,10 +493,7 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
               ),
             ),
           ),
-
           const SizedBox(height: 24),
-
-          // Camera Controls
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -556,10 +520,7 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
               ),
             ],
           ),
-
           const SizedBox(height: 24),
-
-          // System Analytics
           _buildSystemAnalytics(),
         ],
       ),
@@ -707,7 +668,6 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             children: [
               Container(
@@ -738,10 +698,7 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
               ),
             ],
           ),
-
           const SizedBox(height: 32),
-
-          // Welcome Panel
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
@@ -798,10 +755,7 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
               ],
             ),
           ),
-
           const SizedBox(height: 24),
-
-          // Weather & Announcement
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -840,9 +794,7 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
               ],
             ),
           ),
-
           const SizedBox(height: 16),
-
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -872,10 +824,7 @@ class _AttendanceHomePageState extends State<AttendanceHomePage> {
               ],
             ),
           ),
-
           const Spacer(),
-
-          // Clock and Status
           Container(
             padding: const EdgeInsets.only(top: 24),
             decoration: BoxDecoration(
@@ -1014,7 +963,6 @@ class RecognitionPainter extends CustomPainter {
       final color = isUnknown ? Colors.red : Colors.green;
       final label = isUnknown ? 'Tidak Dikenal' : result.name;
 
-      // Calculate scaled coordinates
       final box = result.box;
       final rect = Rect.fromLTRB(
         box.left * size.width / 640,
@@ -1023,7 +971,6 @@ class RecognitionPainter extends CustomPainter {
         box.bottom * size.height / 480,
       );
 
-      // Draw bounding box
       final paint = Paint()
         ..color = color
         ..style = PaintingStyle.stroke
@@ -1031,7 +978,6 @@ class RecognitionPainter extends CustomPainter {
 
       canvas.drawRect(rect, paint);
 
-      // Draw label background
       final textPainter = TextPainter(
         textDirection: ui.TextDirection.ltr,
         text: TextSpan(
@@ -1057,7 +1003,6 @@ class RecognitionPainter extends CustomPainter {
         Paint()..color = color,
       );
 
-      // Draw label text
       textPainter.paint(canvas, Offset(rect.left + 6, rect.top - 16));
     }
   }

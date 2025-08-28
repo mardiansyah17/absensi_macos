@@ -4,9 +4,12 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_window
+  file_saver
+  file_selector_windows
   flutter_webrtc
   permission_handler_windows
   screen_retriever_windows
+  share_plus
   url_launcher_windows
   window_manager
   window_size

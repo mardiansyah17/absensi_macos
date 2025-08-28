@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class PageShell extends StatelessWidget {
   final String title;
   final String? subtitle;
-  final List<Widget>? actions; // tombol di kanan atas
+  final List<Widget>? actions;
   final Widget child;
 
   const PageShell({
@@ -22,7 +22,6 @@ class PageShell extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top bar sederhana
           Container(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
             decoration: BoxDecoration(
@@ -53,8 +52,6 @@ class PageShell extends StatelessWidget {
               ],
             ),
           ),
-
-          // Konten
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),

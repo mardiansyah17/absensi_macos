@@ -22,20 +22,12 @@ class _LayoutState extends State<Layout> {
         icon: CupertinoIcons.check_mark_circled,
         label: 'Kehadiran',
         badgeCount: 2),
-    SidebarItem(icon: CupertinoIcons.person_2, label: 'Karyawan'),
-    SidebarItem(icon: CupertinoIcons.calendar, label: 'Jadwal'),
-    SidebarItem(icon: CupertinoIcons.doc_text, label: 'Laporan'),
+    SidebarItem(icon: CupertinoIcons.calendar, label: 'Karyawan'),
   ];
 
-  final List<SidebarItem> _itemsOther = const [
-    SidebarItem(icon: CupertinoIcons.briefcase, label: 'Cuti'),
-    SidebarItem(icon: CupertinoIcons.gear_alt_fill, label: 'Pengaturan'),
-  ];
-
-  // Biru gradient untuk state aktif
   static const List<Color> _accent = [
-    Color(0xFF3B82F6), // Blue 500
-    Color(0xFF60A5FA), // Blue 400
+    Color(0xFF3B82F6),
+    Color(0xFF60A5FA),
   ];
 
   late final List<Widget> _pages;
@@ -43,10 +35,10 @@ class _LayoutState extends State<Layout> {
   @override
   void initState() {
     super.initState();
-    _pages = const [
-      DashboardPage(),
-      KehadiranPage(),
-      KaryawanPage(),
+    _pages = [
+      const DashboardPageMacOS(),
+      const KahadiranPage(),
+      const EmployeesPageMacOSV2(),
     ];
   }
 
@@ -58,16 +50,11 @@ class _LayoutState extends State<Layout> {
           Sidebar(
             selectedIndex: _selectedIndex,
             onSelect: (i) => setState(() => _selectedIndex = i),
-            // header: const _BrandHeader(),
             sections: [
               SidebarSection(title: 'Utama', items: _itemsMain),
-              SidebarSection(title: 'Lainnya', items: _itemsOther),
             ],
-
             accent: _accent,
           ),
-
-          // Main area — gunakan IndexedStack agar state halaman tetap terjaga
           Expanded(
             child: LazyIndexedStack(
               index: _selectedIndex,

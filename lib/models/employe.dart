@@ -1,4 +1,3 @@
-import 'package:face_client/core/utils/logger.dart';
 import 'package:face_client/models/department.dart';
 
 class Employe {
@@ -26,6 +25,24 @@ class Employe {
       email: json['email'] as String,
       department: Department.fromJson(json['department']),
       faceImageUrl: json['faceImageUrl'],
+    );
+  }
+
+  Employe copyWith({
+    String? id,
+    String? name,
+    String? nip,
+    String? email,
+    Department? department,
+    String? faceImageUrl,
+  }) {
+    return Employe(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      nip: nip ?? this.nip,
+      email: email ?? this.email,
+      department: department ?? this.department,
+      faceImageUrl: faceImageUrl ?? this.faceImageUrl,
     );
   }
 }

@@ -1,12 +1,12 @@
 import 'package:face_client/core/network/dio_client.dart';
 import 'package:face_client/core/utils/logger.dart';
 import 'package:face_client/models/attendance.dart';
+import 'package:face_client/models/department.dart';
 import 'package:face_client/models/employe.dart';
 
 class RemoteDatasource {
   final DioClient dioClient = DioClient();
 
-// get employes
   Future<List<Employe>> getEmployes() async {
     try {
       final response = await dioClient.get('/employees');
@@ -22,13 +22,12 @@ class RemoteDatasource {
     }
   }
 
-  // get departements
-  Future<List<dynamic>> getDepartements() async {
+  Future<List<Department>> getDepartements() async {
     try {
       final response = await dioClient.get('/departments');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] as List<dynamic>;
-        return data;
+        return data.map((e) => Department.fromJson(e)).toList();
       } else {
         throw Exception('Failed to load departements');
       }
@@ -37,7 +36,6 @@ class RemoteDatasource {
     }
   }
 
-  // register employe
   Future<void> registerEmploye(Employe data) async {
     try {
       final response = await dioClient.post('/register-employe', data: {
@@ -46,6 +44,7 @@ class RemoteDatasource {
         'email': data.email,
         'departmentId': data.department?.id,
       });
+      logger.w(response.statusCode);
       if (response.statusCode != 201) {
         throw Exception('Failed to register employe');
       }
@@ -55,7 +54,6 @@ class RemoteDatasource {
     }
   }
 
-// update employe
   Future<void> updateEmploye(String id, Map<String, dynamic> data) async {
     try {
       final response = await dioClient.put('/update-employee/$id', data: data);
@@ -69,9 +67,11 @@ class RemoteDatasource {
     }
   }
 
-  Future<List<Attendance>> getAttendances() async {
+  Future<List<Attendance>> getAttendances({
+    required String date,
+  }) async {
     try {
-      final response = await dioClient.get('/attendances-report');
+      final response = await dioClient.get('/attendances-report?date=$date');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] as List<dynamic>;
 

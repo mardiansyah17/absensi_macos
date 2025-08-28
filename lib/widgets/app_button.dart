@@ -1,16 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// AppButton – tombol modern untuk desktop/macOS & mobile
-/// Fitur:
-/// - Variants: primary, tonal, outline
-/// - State: hover, pressed, focused (animated)
-/// - Disabled & loading
-/// - Ukuran: small, medium, large
-/// - Aksesibilitas: keyboard (Enter/Space), semantics, tooltip
-/// - Backward-compatible dengan versi lama (punya `text` & `icon: IconData?`)
 class AppButton extends StatefulWidget {
-  /// Backward-compatible: gunakan `text` + `icon: IconData?` seperti versi lama
-  /// atau gunakan `label` (Widget) + `iconWidget` (Widget) untuk kontrol penuh.
   const AppButton({
     super.key,
     this.text,
@@ -28,7 +18,6 @@ class AppButton extends StatefulWidget {
     this.focusNode,
   });
 
-  /// Primary shortcut: label/Icon sebagai Widget
   factory AppButton.primary({
     Key? key,
     required VoidCallback? onPressed,
@@ -95,19 +84,14 @@ class AppButton extends StatefulWidget {
         tooltip: tooltip,
       );
 
-  /// Label teks (opsional jika pakai [label] Widget)
   final String? text;
 
-  /// Label Widget (lebih fleksibel). Jika null, akan memakai [text].
   final Widget? label;
 
-  /// Ikon (legacy) – hanya dipakai jika [iconWidget] null
   final IconData? icon;
 
-  /// Ikon sebagai Widget untuk kontrol penuh
   final Widget? iconWidget;
 
-  /// Callback tekan; jika null tombol dianggap disabled
   final VoidCallback? onPressed;
 
   final AppButtonStyle style;
@@ -189,7 +173,7 @@ class _AppButtonState extends State<AppButton> {
       duration: const Duration(milliseconds: 120),
       curve: Curves.easeOut,
       padding: widget.padding ??
-          EdgeInsets.symmetric(
+          const EdgeInsets.symmetric(
             vertical: 1,
             horizontal: 12,
           ),
@@ -313,7 +297,7 @@ _ButtonTokens _tokens(
         );
       case AppButtonStyle.tonal:
         return _ButtonTokens(
-          bgColor: cs.surfaceVariant.withOpacity(0.6),
+          bgColor: cs.surfaceContainerHighest.withOpacity(0.6),
           fgColor: cs.onSurface.withOpacity(0.45),
           border: Border.all(color: cs.outline.withOpacity(0.2)),
         );

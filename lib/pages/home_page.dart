@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
     );
 
     socket.on("faces", (data) {
-      // Ubah List<dynamic> ke List<Rect>
       List<dynamic> raw = data as List<dynamic>;
       final List<Rect> boxes = raw.map((face) {
         final x = face['_x'] as double;
@@ -66,12 +65,10 @@ class _HomePageState extends State<HomePage> {
     double offsetY = 0;
 
     if (imageAspect > widgetAspect) {
-      // Image is wider: fit width
       scale = widgetSize.width / imageSize.width;
       final scaledHeight = imageSize.height * scale;
       offsetY = (widgetSize.height - scaledHeight) / 2;
     } else {
-      // Image is taller: fit height
       scale = widgetSize.height / imageSize.height;
       final scaledWidth = imageSize.width * scale;
       offsetX = (widgetSize.width - scaledWidth) / 2;
@@ -89,10 +86,10 @@ class _HomePageState extends State<HomePage> {
     final length = argb.length;
     final rgba = Uint8List(length);
     for (int i = 0; i < length; i += 4) {
-      rgba[i] = argb[i + 1]; // R
-      rgba[i + 1] = argb[i + 2]; // G
-      rgba[i + 2] = argb[i + 3]; // B
-      rgba[i + 3] = argb[i]; // A
+      rgba[i] = argb[i + 1];
+      rgba[i + 1] = argb[i + 2];
+      rgba[i + 2] = argb[i + 3];
+      rgba[i + 3] = argb[i];
     }
     return rgba;
   }
@@ -132,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                     print("⏱️ Waktu proses & kirim: ${duration}ms");
 
                     final jpegSize = jpeg.lengthInBytes;
-                    // print dalam ukuran kb
+
                     print("📏 Ukuran JPEG: ${jpegSize / 1024} KB");
                     final now = DateTime.now();
                     final formattedTime =
@@ -155,7 +152,6 @@ class _HomePageState extends State<HomePage> {
                 cameraKey.currentContext?.findRenderObject() as RenderBox?;
             final widgetSize = renderBox?.size ?? Size.zero;
 
-            // Gunakan ukuran asli gambar dari stream
             const imageSize = Size(
               1280,
               720,
